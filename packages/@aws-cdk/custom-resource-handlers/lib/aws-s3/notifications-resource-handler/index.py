@@ -49,8 +49,9 @@ def handle_unmanaged(bucket, stack_id, request_type, notification_configuration,
         # if the notification was created by us, we know what id to expect so we can filter by it.
         external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'] in old_incoming_ids]
     elif request_type == 'Create':
-        # if this is a create event then all existing notifications are external
-        external_notifications[t] = [n for n in existing_notifications.get(t, [])]
+        ids = [with_id(n) for n in notification_configuration.get(t, [])]
+        incoming_ids = [n['Id'] for n in ids]
+        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'] in incoming_ids]
   # always treat EventBridge configuration as an external config if it already exists
   # as there is no way to determine whether it's managed by us or not
   if EVENTBRIDGE_CONFIGURATION in existing_notifications:
